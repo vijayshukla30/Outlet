@@ -16,6 +16,7 @@ const (
 
 type repository interface {
 	Create(*pb.Consignment) (*pb.Consignment, error)
+	GetAll() []*pb.Consignment
 }
 
 type Repository struct {
@@ -29,6 +30,10 @@ func (repo *Repository) Create(consignment *pb.Consignment) (*pb.Consignment, er
 	repo.consignments = updated
 	repo.mu.Unlock()
 	return consignment, nil
+}
+
+func (repo *Repository) GetAll() []*pb.Consignment {
+	return repo.consignments
 }
 
 type service struct {
@@ -45,6 +50,11 @@ func (s *service) CreateConsignment(ctx context.Context, req *pb.Consignment) (*
 		Created:     true,
 		Consignment: consignment,
 	}, nil
+}
+
+func (s *service) GetConsignments(ctx context.Context, req *pb.GetRequest) (*pb.Response, error) {
+	consignments := s.repo.GetAll()
+	return &pb.Response{Consignments: consignments}, nil
 }
 
 func main() {
