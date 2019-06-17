@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"github.com/micro/go-micro"
 	pb "github.com/vijayshukla30/Outlet/consignment-service/proto/consignment"
-	"google.golang.org/grpc"
 	"io/ioutil"
 	"log"
 	"os"
@@ -28,14 +28,12 @@ func parseFile(file string) (*pb.Consignment, error) {
 }
 
 func main() {
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("Did not connect: %v ", err)
-	}
 
-	defer conn.Close()
-
-	client := pb.NewShippingServiceClient(conn)
+	service := micro.NewService(
+		micro.Name("consignment.cli"),
+	)
+	service.Init()
+	client := pb.NewShippingServiceClient("consignment.service", service.Client())
 
 	file := defaultFilename
 	if len(os.Args) > 1 {
